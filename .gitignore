@@ -6,7 +6,6 @@ venv/
 __pycache__/
 *.pyc
 
-# Data sets and archives
-dataset/
-augmented_directory/
+# Data sets
+data/
 *.zip
