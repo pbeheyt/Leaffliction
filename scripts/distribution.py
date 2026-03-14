@@ -63,8 +63,13 @@ def analyze_dataset(directory):
     # Ajuster la mise en page
     plt.tight_layout(rect=[0, 0.03, 1, 0.95])
     
-    # 3. Afficher les graphiques
-    plt.show()
+    # 3. Sauvegarder les graphiques
+    os.makedirs('resultats', exist_ok=True)
+    out_path = f"resultats/distribution_{dataset_name}.png"
+    plt.savefig(out_path, bbox_inches='tight')
+    plt.close()
+    
+    print(f"Le graphique des distributions a été sauvegardé sous: {out_path}")
 
 def main():
     parser = argparse.ArgumentParser(

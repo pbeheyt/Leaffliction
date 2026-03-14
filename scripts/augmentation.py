@@ -122,7 +122,16 @@ def augment_image(image_path):
         ax.axis('off') # Désactive les numéros d'axes
 
     plt.tight_layout()
-    plt.show()
+    
+    # 3. Au lieu d'afficher avec plt.show(), on sauvegarde le récapitulatif
+    os.makedirs('resultats', exist_ok=True)
+    base_name = os.path.basename(orig_name)
+    out_path = f"resultats/augmentation_plot_{base_name}.png"
+    
+    plt.savefig(out_path, bbox_inches='tight')
+    plt.close()
+    
+    print(f"Le plot récapitulatif a été sauvegardé sous: {out_path}")
 
 def main():
     parser = argparse.ArgumentParser(
