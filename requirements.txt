@@ -2,4 +2,8 @@ flake8
 matplotlib
 opencv-python
 numpy
+Pillow
+pandas
+scikit-learn
+joblib
 plantcv
