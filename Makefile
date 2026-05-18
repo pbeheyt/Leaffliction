@@ -1,4 +1,4 @@
-.PHONY: all create-venv install-deps distribution augmentation balance clean jupyter
+.PHONY: all create-venv install-deps distribution augmentation transformation balance clean jupyter lint
 
 all: create-venv install-deps
 
@@ -17,6 +17,12 @@ augmentation:
 
 balance:
 	@venv/bin/python3 scripts/balance.py data/leaves/images --output data/augmented
+
+transformation:
+	@venv/bin/python3 scripts/transformation.py "data/leaves/images/Apple_healthy/image (1).JPG"
+
+lint:
+	@venv/bin/flake8 scripts
 
 jupyter:
 	@venv/bin/jupyter lab
