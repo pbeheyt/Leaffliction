@@ -8,6 +8,7 @@ IMAGE_PATH = data/leaves/images/Apple_Black_rot/image (1).JPG
 AUGMENTED_PATH = data/augmented
 TRANSFORMED_PATH = data/transformed
 PACKAGE_PATH = packages/dataset.zip
+SIGNATURE_PATH = signature.txt
 
 PYTHONPATH = .
 
@@ -28,6 +29,8 @@ create-venv:
 install-deps:
 	venv/bin/pip install -r requirements.txt
 
+setup: create-venv install-deps
+
 distribution:
 	@PYTHONPATH="$(PYTHONPATH)" venv/bin/python3 -c "from src.data_analysis.distribution import analyze_dataset; import sys; analyze_dataset(sys.argv[1])" "$(DATASET_PATH)"
 
@@ -43,18 +46,31 @@ balance:
 transform:
 	@PYTHONPATH="$(PYTHONPATH)" venv/bin/python3 -c "from src.data_transformation.transformation import main; main()" "$(IMAGE_PATH)"
 
+transform-batch:
+	@PYTHONPATH="$(PYTHONPATH)" venv/bin/python3 -c "from src.data_transformation.transformation import main; main()" -src "$(DATASET_PATH)" -dst "$(TRANSFORMED_PATH)" -mask
+
 train:
-	@PYTHONPATH="$(PYTHONPATH)" venv/bin/python3 -c "from src.classification.train import main; main()" "$(AUGMENTED_PATH)"
+	@PYTHONPATH="$(PYTHONPATH)" venv/bin/python3 -u -c "from src.classification.train import main; main()" "$(AUGMENTED_PATH)"
 
 predict:
 	@PYTHONPATH="$(PYTHONPATH)" venv/bin/python3 -c "from src.classification.predict import main; main()" "$(IMAGE_PATH)"
 
 package:
 	@mkdir -p packages
-	@echo "Packaging step placeholder. Will be completed in Gate F."
+	@test -d "$(AUGMENTED_PATH)" || (echo "Error: missing $(AUGMENTED_PATH). Run augmentation/balance first." && exit 1)
+	@test -f "models/leaf_model.joblib" || (echo "Error: missing models/leaf_model.joblib. Run training first." && exit 1)
+	@rm -f "$(PACKAGE_PATH)"
+	@{ \
+		find "$(AUGMENTED_PATH)" -type f; \
+		if [ -d "$(TRANSFORMED_PATH)" ]; then find "$(TRANSFORMED_PATH)" -type f; fi; \
+		printf '%s\n' "models/leaf_model.joblib" "results/classification/validation_report.json" "results/classification/validation_report.txt"; \
+	} | sort | zip -X -q "$(PACKAGE_PATH)" -@
+	@echo "Package created: $(PACKAGE_PATH)"
 
 signature:
-	@echo "Signature step placeholder. Will be completed in Gate F."
+	@test -f "$(PACKAGE_PATH)" || (echo "Error: missing $(PACKAGE_PATH). Run 'make package' first." && exit 1)
+	@sha1sum "$(PACKAGE_PATH)" > "$(SIGNATURE_PATH)"
+	@echo "Signature saved: $(SIGNATURE_PATH)"
 
 transformation:
 	@venv/bin/python3 scripts/transformation.py "data/leaves/images/Apple_healthy/image (1).JPG"
@@ -66,5 +82,6 @@ jupyter:
 	@venv/bin/jupyter lab
 
 clean:
+	rm -rf data/augmented data/transformed results/classification models/leaf_model.joblib packages/dataset.zip signature.txt
 	rm -rf venv results models packages "$(TRANSFORMED_PATH)"
 	find . -type d -name "__pycache__" -exec rm -rf {} +

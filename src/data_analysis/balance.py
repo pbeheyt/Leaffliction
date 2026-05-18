@@ -7,10 +7,13 @@ import cv2
 from . import augmentation
 
 
-def balance_directory(dataset_dir, output_dir):
+def balance_directory(dataset_dir, output_dir, seed=None):
     """Balance the dataset using augmentations on minority classes."""
     if not os.path.exists(output_dir):
         os.makedirs(output_dir)
+
+    if seed is not None:
+        random.seed(seed)
 
     valid_extensions = {".jpg", ".jpeg", ".png", ".bmp"}
     class_samples = {}
@@ -21,7 +24,9 @@ def balance_directory(dataset_dir, output_dir):
 
         folder_name = os.path.basename(root)
         images = [
-            f for f in files if os.path.splitext(f)[1].lower() in valid_extensions
+            f
+            for f in files
+            if os.path.splitext(f)[1].lower() in valid_extensions
         ]
         class_samples[folder_name] = images
 
@@ -56,19 +61,25 @@ def balance_directory(dataset_dir, output_dir):
         print(f"[{class_name}] Processing {current_count} files...")
 
         for img_name in image_list:
-            shutil.copy2(os.path.join(src_path, img_name), os.path.join(dst_path, img_name))
+            shutil.copy2(
+                os.path.join(src_path, img_name),
+                os.path.join(dst_path, img_name),
+            )
 
         images_to_add = max_images - current_count
         if images_to_add <= 0:
             continue
 
         print(f"[{class_name}] Augmenting {images_to_add} files to reach balance...")
-        while images_to_add > 0:
+        failures = 0
+        max_failures = max(10, len(image_list) * 2)
+        while images_to_add > 0 and failures < max_failures:
             rand_img_name = random.choice(image_list)
             rand_img_path = os.path.join(src_path, rand_img_name)
             img = cv2.imread(rand_img_path)
 
             if img is None:
+                failures += 1
                 continue
 
             trans_name, trans_func = random.choice(list(augmentations.items()))
@@ -79,3 +90,6 @@ def balance_directory(dataset_dir, output_dir):
             cv2.imwrite(os.path.join(dst_path, new_filename), modified_img)
 
             images_to_add -= 1
+
+        if failures >= max_failures:
+            print(f"[{class_name}] Stopped early due to repeated read failures.")
