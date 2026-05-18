@@ -1,4 +1,4 @@
-.PHONY: all create-venv install-deps distribution augmentation balance transform train predict package signature clean jupyter lint
+.PHONY: all create-venv install-deps setup distribution augmentation balance transform transform-batch train predict package signature clean jupyter lint
 
 
 
@@ -27,7 +27,9 @@ create-venv:
 	@printf "Virtual environment created!\n"
 
 install-deps:
-	venv/bin/pip install -r requirements.txt
+	@test -x venv/bin/python3 || (echo "Error: missing venv. Run 'make create-venv' or 'make setup' first." && exit 1)
+	venv/bin/python3 -m pip install --upgrade pip
+	venv/bin/python3 -m pip install -r requirements.txt
 
 setup: create-venv install-deps
 

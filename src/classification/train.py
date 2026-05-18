@@ -138,7 +138,7 @@ def main():
     args = parser.parse_args()
 
     if not os.path.isdir(args.directory):
-        print(f"Error: {args.directory} is not a valid directory.")
+        print(f"Error: {args.directory} data/augmented is not a valid directory.")
         return
 
     if not 0.0 < args.test_size < 1.0:

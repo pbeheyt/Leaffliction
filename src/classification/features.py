@@ -3,10 +3,11 @@ import os
 import cv2
 import numpy as np
 
+from src.data_transformation.transformation import color_histogram_draw
 from src.common.mask import (
     DEFAULT_LOWER_GREEN,
     DEFAULT_UPPER_GREEN,
-    build_leaf_mask,
+    build_mask,
 )
 
 
@@ -21,8 +22,6 @@ UPPER_GREEN = DEFAULT_UPPER_GREEN
 
 def extract_features(image_path):
     image_bgr = cv2.imread(image_path)
-    if image_bgr is None:
-        raise ValueError(f"Failed to read image: {image_path}")
 
     image_bgr = cv2.resize(
         image_bgr,
@@ -32,7 +31,7 @@ def extract_features(image_path):
 
     hsv = cv2.cvtColor(image_bgr, cv2.COLOR_BGR2HSV)
 
-    mask = build_leaf_mask(image_bgr, LOWER_GREEN, UPPER_GREEN, hsv=hsv)
+    mask = build_mask(image_bgr)
     hsv_channels = cv2.split(hsv)
 
     color_stats = []
@@ -40,12 +39,9 @@ def extract_features(image_path):
         color_stats.extend([float(np.mean(channel)), float(np.std(channel))])
 
     hist_features = []
-    for channel in hsv_channels:
-        hist = cv2.calcHist([channel], [0], mask, [4], [0, 256]).flatten()
-        total = float(hist.sum())
-        if total > 0:
-            hist = hist / total
-        hist_features.extend(hist.astype(float).tolist())
+    factory = color_histogram_draw(
+        image_bgr, mask, is_extracting_features=True)
+    hist_features.extend(factory(None))
 
     gray = cv2.cvtColor(image_bgr, cv2.COLOR_BGR2GRAY)
     lap_var = float(cv2.Laplacian(gray, cv2.CV_64F).var())

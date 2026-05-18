@@ -12,3 +12,7 @@ data/
 
 results/
 plan.md
+
+.cache/
+models/
+*.lib
