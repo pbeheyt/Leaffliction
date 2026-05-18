@@ -72,6 +72,7 @@ def analyze_dataset(directory):
     os.makedirs("results", exist_ok=True)
     out_path = f"results/distribution_{dataset_name}.png"
     plt.savefig(out_path, bbox_inches="tight")
+    plt.show()
     plt.close()
 
     print(f"Distribution chart saved to: {out_path}")
