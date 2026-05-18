@@ -10,7 +10,7 @@ from src.classification.features import DEFAULT_IMAGE_SIZE, extract_features
 from src.common.mask import (
     DEFAULT_LOWER_GREEN,
     DEFAULT_UPPER_GREEN,
-    build_leaf_mask,
+    build_mask,
 )
 
 
@@ -28,7 +28,7 @@ def _build_preview(image_path):
         (DEFAULT_IMAGE_SIZE, DEFAULT_IMAGE_SIZE),
         interpolation=cv2.INTER_AREA,
     )
-    mask = build_leaf_mask(resized_bgr, LOWER_GREEN, UPPER_GREEN)
+    mask = build_mask(resized_bgr)
     masked_bgr = cv2.bitwise_and(resized_bgr, resized_bgr, mask=mask)
 
     return original_bgr, resized_bgr, mask, masked_bgr

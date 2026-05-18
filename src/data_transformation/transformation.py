@@ -5,7 +5,8 @@ import argparse
 import sys
 import cv2
 import os
-
+from src.common.load_image import load_image
+from src.common.mask import build_mask
 
 TRANSFORM_KEYS = {
     "blur": "Gaussian blur",
@@ -18,25 +19,7 @@ TRANSFORM_KEYS = {
 IMAGE_EXTS = (".jpg", ".jpeg", ".png")
 
 
-def load_image(path):
-    img = cv2.imread(path)
-    if img is None:
-        print(f"Error: cannot read image at {path}", file=sys.stderr)
-        return None
-    return img
-
-
-def build_mask(img):
-    gray = pcv.rgb2gray_lab(rgb_img=img, channel="a")
-    binary = pcv.threshold.binary(
-        gray_img=gray, threshold=120, object_type="dark"
-    )
-    cleaned = pcv.fill(bin_img=binary, size=50)
-    cleaned = pcv.fill_holes(bin_img=cleaned)
-    return cleaned
-
-
-def color_histogram_draw(img, mask):
+def color_histogram_draw(img, mask, is_extracting_features=False):
     def _draw(ax):
         total = int(np.count_nonzero(mask))
         if total == 0:
@@ -56,14 +39,25 @@ def color_histogram_draw(img, mask):
             ("Green-Magenta", lab, 1, "magenta"),
             ("Blue-Yellow", lab, 2, "gold"),
         ]
+
+        hist_features = []
         for name, src, ch, color in channels:
-            hist = cv2.calcHist([src], [ch], mask, [256], [0, 256])
-            hist = (hist / total) * 100.0
-            ax.plot(hist, color=color, label=name)
-        ax.set_xlim([0, 256])
-        ax.set_xlabel("Pixel intensity")
-        ax.set_ylabel("Proportion of pixels (%)")
-        ax.legend(fontsize=7)
+            hist = cv2.calcHist([src], [ch], mask, [256], [0, 256]).flatten()
+            if (is_extracting_features):
+                tmp = hist / total
+                hist_features.extend(tmp.astype(float).tolist())
+            else:
+                ax.plot(hist, color=color, label=name)
+                hist = (hist / total) * 100.0
+
+        if (not is_extracting_features):
+            ax.set_xlim([0, 256])
+            ax.set_xlabel("Pixel intensity")
+            ax.set_ylabel("Proportion of pixels (%)")
+            ax.legend(fontsize=7)
+        else:
+            return hist_features
+
     return _draw
 
 
