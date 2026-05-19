@@ -4,7 +4,8 @@ import shutil
 
 import cv2
 
-from . import augmentation
+from src.common.load_image import VALID_IMAGE_EXTENSIONS, load_image
+from .augmentation import AUGMENTATION_REGISTRY
 
 
 def balance_directory(dataset_dir, output_dir, seed=None):
@@ -15,7 +16,7 @@ def balance_directory(dataset_dir, output_dir, seed=None):
     if seed is not None:
         random.seed(seed)
 
-    valid_extensions = {".jpg", ".jpeg", ".png", ".bmp"}
+    valid_extensions = VALID_IMAGE_EXTENSIONS
     class_samples = {}
 
     for root, _, files in os.walk(dataset_dir):
@@ -37,14 +38,7 @@ def balance_directory(dataset_dir, output_dir, seed=None):
     max_images = max(len(imgs) for imgs in class_samples.values())
     print(f"Target count per class for balancing: {max_images} images.")
 
-    augmentations = {
-        "Flip": augmentation.flip_image,
-        "Rotate": lambda img: augmentation.rotate_image(img, 45),
-        "Skew": augmentation.skew_image,
-        "Shear": augmentation.shear_image,
-        "Crop": augmentation.crop_image,
-        "Distortion": lambda img: augmentation.distort_image(img, -0.2),
-    }
+    augmentations = AUGMENTATION_REGISTRY
 
     for class_name, image_list in class_samples.items():
         if not image_list:
@@ -76,9 +70,9 @@ def balance_directory(dataset_dir, output_dir, seed=None):
         while images_to_add > 0 and failures < max_failures:
             rand_img_name = random.choice(image_list)
             rand_img_path = os.path.join(src_path, rand_img_name)
-            img = cv2.imread(rand_img_path)
-
-            if img is None:
+            try:
+                img = load_image(rand_img_path)
+            except ValueError:
                 failures += 1
                 continue
 

@@ -4,6 +4,8 @@ import cv2
 import matplotlib.pyplot as plt
 import numpy as np
 
+from src.common.load_image import load_image
+
 
 def flip_image(img):
     return cv2.flip(img, 1)
@@ -50,7 +52,7 @@ def crop_image(img):
     h, w = img.shape[:2]
     target_h, target_w = int(h * 0.5), int(w * 0.5)
     start_y, start_x = (h - target_h) // 2, (w - target_w) // 2
-    return img[start_y : start_y + target_h, start_x : start_x + target_w]
+    return img[start_y:start_y + target_h, start_x:start_x + target_w]
 
 
 def distort_image(img, power=0.5):
@@ -68,23 +70,29 @@ def distort_image(img, power=0.5):
     return cv2.undistort(img, camera_matrix, dist_coeffs, None, new_camera_matrix)
 
 
+AUGMENTATION_REGISTRY = {
+    "Flip": flip_image,
+    "Rotate": lambda img: rotate_image(img, 45),
+    "Skew": skew_image,
+    "Shear": shear_image,
+    "Crop": crop_image,
+    "Distortion": lambda img: distort_image(img, -0.2),
+}
+
+
 def augment_image(image_path):
+    """
+    Apply all 6 augmentation types to a single image.
+    Saves each result as <original_name>_<Type>.<ext> alongside the source,
+    and displays a summary plot of all transformations.
+    """
     print(f"Applying data augmentation on {image_path}...")
 
-    img = cv2.imread(image_path)
-    if img is None:
-        print(f"Failed to read image at {image_path}")
-        return
-
+    img = load_image(image_path)
     orig_name, ext = os.path.splitext(image_path)
 
     transformations = {
-        "Flip": flip_image(img),
-        "Rotate": rotate_image(img, 45),
-        "Skew": skew_image(img),
-        "Shear": shear_image(img),
-        "Crop": crop_image(img),
-        "Distortion": distort_image(img, -0.2),
+        name: func(img) for name, func in AUGMENTATION_REGISTRY.items()
     }
 
     fig, axes = plt.subplots(3, 2, figsize=(10, 8))

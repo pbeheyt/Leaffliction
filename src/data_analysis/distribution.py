@@ -2,6 +2,8 @@ import os
 
 import matplotlib.pyplot as plt
 
+from src.common.load_image import VALID_IMAGE_EXTENSIONS
+
 
 def analyze_dataset(directory):
     """
@@ -12,7 +14,7 @@ def analyze_dataset(directory):
 
     plant_data = {}
     total_images = 0
-    valid_extensions = {".jpg", ".jpeg", ".png", ".bmp"}
+    valid_extensions = VALID_IMAGE_EXTENSIONS
 
     for root, _, files in os.walk(directory):
         if root == directory:
