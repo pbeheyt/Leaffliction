@@ -89,7 +89,8 @@ def augment_image(image_path):
     print(f"Applying data augmentation on {image_path}...")
 
     img = load_image(image_path)
-    orig_name, ext = os.path.splitext(image_path)
+    base_name = os.path.basename(image_path)
+    orig_name, ext = os.path.splitext(base_name)
 
     transformations = {
         name: func(img) for name, func in AUGMENTATION_REGISTRY.items()
