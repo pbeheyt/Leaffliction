@@ -143,7 +143,6 @@ def display_transformations(transformations):
         axes_flat[idx].axis("off")
 
     plt.tight_layout()
-    plt.show()
 
 
 def compute_transformations(img, selected):
@@ -157,7 +156,7 @@ def compute_transformations(img, selected):
                      img=img, mask=mask, mask_color="white")),
         "roi": ("ROI objects", lambda: roi_transform(img, mask)),
         "analyze": ("Analyze object", lambda: analyze_transform(img, mask)),
-        "landmarks": ("Pseudolandmarks",
+        "landmarks": ("Pseudolandmar -maskks",
                       lambda: pseudolandmarks_transform(img, mask)),
         "hist": ("Color histogram", lambda: color_histogram_draw(img, mask)),
     }
@@ -193,10 +192,6 @@ def save_transformations(transformations, dst_dir, base_name, ext):
             out_path = os.path.join(dst_dir, f"{base_name}_{key}{ext}")
             cv2.imwrite(out_path, value)
         print(f"  saved {out_path}")
-    plt.tight_layout()
-    plt.savefig(os.path.join(
-        dst_dir, f"{base_name}_transformations{ext}"), bbox_inches="tight")
-    plt.close()
 
 
 def run_single(image_path, selected):

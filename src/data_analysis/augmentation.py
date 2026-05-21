@@ -125,7 +125,6 @@ def augment_image(image_path, results_dir="results"):
     out_path = os.path.join(results_dir, f"augmentation_plot_{base_name}.png")
 
     plt.savefig(out_path, bbox_inches="tight")
-    plt.show()
     plt.close()
 
     print(f"Summary plot saved to: {out_path}")

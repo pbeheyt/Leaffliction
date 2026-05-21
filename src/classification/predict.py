@@ -65,7 +65,6 @@ def _save_prediction_figure(
     )
     plt.tight_layout()
     plt.savefig(output_path, bbox_inches="tight")
-    plt.show()
     plt.close(fig)
     return output_path
 
@@ -136,4 +135,3 @@ def predict_image(
         plt.axis("off")
         plt.title(f"Prediction: {predicted_class} ({confidence:.4f})")
         plt.tight_layout()
-        plt.show()

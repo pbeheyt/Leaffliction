@@ -49,7 +49,7 @@ transform:
 	@venv/bin/python3 scripts/Transformation.py "$(IMAGE_PATH)"
 
 transform-batch:
-	@venv/bin/python3 scripts/Transformation.py -src "$(DATASET_PATH)" -dst "$(TRANSFORMED_PATH)" -mask
+	@venv/bin/python3 scripts/Transformation.py -src "$(DATASET_PATH)" -dst "$(TRANSFORMED_PATH)"
 
 train:
 	@venv/bin/python3 -u scripts/train.py "$(AUGMENTED_PATH)"
@@ -84,6 +84,6 @@ jupyter:
 	@venv/bin/jupyter lab
 
 clean:
-	rm -rf data/augmented data/transformed results/classification models/leaf_model.joblib packages/dataset.zip signature.txt
-	rm -rf venv results models packages "$(TRANSFORMED_PATH)"
+	rm -rf data/augmented data/transformed results/classification models/leaf_model.joblib
+	rm -rf venv results models "$(TRANSFORMED_PATH)"
 	find . -type d -name "__pycache__" -exec rm -rf {} +
