@@ -5,7 +5,7 @@ import matplotlib.pyplot as plt
 from src.common.load_image import VALID_IMAGE_EXTENSIONS
 
 
-def analyze_dataset(directory):
+def analyze_dataset(directory, output_dir="results"):
     """
     Analyze the dataset by counting images per subdirectory
     and generating pie and bar charts.
@@ -74,8 +74,8 @@ def analyze_dataset(directory):
 
     plt.tight_layout(rect=[0, 0.03, 1, 0.95])
 
-    os.makedirs("results", exist_ok=True)
-    out_path = f"results/distribution_{dataset_name}.png"
+    os.makedirs(output_dir, exist_ok=True)
+    out_path = os.path.join(output_dir, f"distribution_{dataset_name}.png")
     plt.savefig(out_path, bbox_inches="tight")
     plt.show()
     plt.close()

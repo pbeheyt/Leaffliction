@@ -34,28 +34,28 @@ install-deps:
 setup: create-venv install-deps
 
 distribution:
-	@PYTHONPATH="$(PYTHONPATH)" venv/bin/python3 -c "from src.data_analysis.distribution import analyze_dataset; import sys; analyze_dataset(sys.argv[1])" "$(DATASET_PATH)"
+	@venv/bin/python3 scripts/Distribution.py "$(DATASET_PATH)"
 
 %:
 	@:
 
 augmentation:
-	@PYTHONPATH="$(PYTHONPATH)" venv/bin/python3 -c "from src.data_analysis.main import run; import sys; run(sys.argv[1], '$(AUGMENTED_PATH)')" "$(IMAGE_PATH)"
+	@venv/bin/python3 scripts/Augmentation.py "$(IMAGE_PATH)"
 
 balance:
-	@PYTHONPATH="$(PYTHONPATH)" venv/bin/python3 -c "from src.data_analysis.main import run; import sys; run(sys.argv[1], sys.argv[2])" "$(DATASET_PATH)" "$(AUGMENTED_PATH)"
+	@venv/bin/python3 scripts/balance.py "$(DATASET_PATH)" --output "$(AUGMENTED_PATH)"
 
 transform:
-	@PYTHONPATH="$(PYTHONPATH)" venv/bin/python3 -c "from src.data_transformation.transformation import main; main()" "$(IMAGE_PATH)"
+	@venv/bin/python3 scripts/Transformation.py "$(IMAGE_PATH)"
 
 transform-batch:
-	@PYTHONPATH="$(PYTHONPATH)" venv/bin/python3 -c "from src.data_transformation.transformation import main; main()" -src "$(DATASET_PATH)" -dst "$(TRANSFORMED_PATH)" -mask
+	@venv/bin/python3 scripts/Transformation.py -src "$(DATASET_PATH)" -dst "$(TRANSFORMED_PATH)" -mask
 
 train:
-	@PYTHONPATH="$(PYTHONPATH)" venv/bin/python3 -u -c "from src.classification.train import main; main()" "$(AUGMENTED_PATH)"
+	@venv/bin/python3 -u scripts/train.py "$(AUGMENTED_PATH)"
 
 predict:
-	@PYTHONPATH="$(PYTHONPATH)" venv/bin/python3 -c "from src.classification.predict import main; main()" "$(IMAGE_PATH)"
+	@venv/bin/python3 scripts/predict.py "$(IMAGE_PATH)"
 
 package:
 	@mkdir -p packages
