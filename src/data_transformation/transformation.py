@@ -193,6 +193,10 @@ def save_transformations(transformations, dst_dir, base_name, ext):
             out_path = os.path.join(dst_dir, f"{base_name}_{key}{ext}")
             cv2.imwrite(out_path, value)
         print(f"  saved {out_path}")
+    plt.tight_layout()
+    plt.savefig(os.path.join(
+        dst_dir, f"{base_name}_transformations{ext}"), bbox_inches="tight")
+    plt.close()
 
 
 def run_single(image_path, selected):
@@ -201,6 +205,12 @@ def run_single(image_path, selected):
         sys.exit(1)
     transformations = compute_transformations(img, selected)
     display_transformations(transformations)
+    os.makedirs("results", exist_ok=True)
+    out_path = "results/transformations_images"
+    plt.tight_layout()
+    plt.savefig(out_path, bbox_inches="tight")
+    print(f"transformations saved to: {out_path}")
+    plt.close()
 
 
 def run_batch(src_dir, dst_dir, selected):
