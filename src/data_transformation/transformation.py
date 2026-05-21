@@ -22,35 +22,36 @@ IMAGE_EXTS = (".jpg", ".jpeg", ".png")
 def color_histogram_draw(img, mask, is_extracting_features=False):
     def _draw(ax):
         total = int(np.count_nonzero(mask))
-        if total == 0:
-            return
         channels = [
-            ("Blue", img, 0, "blue"),
-            ("Green", img, 1, "green"),
-            ("Red", img, 2, "red"),
+            ("Blue", img, 0, "blue", 256),
+            ("Green", img, 1, "green", 256),
+            ("Red", img, 2, "red", 256),
         ]
         hsv = cv2.cvtColor(img, cv2.COLOR_BGR2HSV)
         lab = cv2.cvtColor(img, cv2.COLOR_BGR2LAB)
         channels += [
-            ("Hue", hsv, 0, "purple"),
-            ("Saturation", hsv, 1, "cyan"),
-            ("Value", hsv, 2, "orange"),
-            ("Lightness", lab, 0, "gray"),
-            ("Green-Magenta", lab, 1, "magenta"),
-            ("Blue-Yellow", lab, 2, "gold"),
+            ("Hue", hsv, 0, "purple", 180),
+            ("Saturation", hsv, 1, "cyan", 256),
+            ("Value", hsv, 2, "orange", 256),
+            ("Lightness", lab, 0, "gray", 256),
+            ("Green-Magenta", lab, 1, "magenta", 256),
+            ("Blue-Yellow", lab, 2, "gold", 256),
         ]
+        n_features = sum(vmax for *_, vmax in channels)
+        if total == 0:
+            return [0.0] * n_features if is_extracting_features else None
 
         hist_features = []
-        for name, src, ch, color in channels:
-            hist = cv2.calcHist([src], [ch], mask, [256], [0, 256]).flatten()
-            if (is_extracting_features):
-                tmp = hist / total
-                hist_features.extend(tmp.astype(float).tolist())
+        for name, src, ch, color, vmax in channels:
+            hist = cv2.calcHist(
+                [src], [ch], mask, [vmax], [0, vmax]).flatten()
+            hist = hist / total
+            if is_extracting_features:
+                hist_features.extend(hist.astype(float).tolist())
             else:
-                ax.plot(hist, color=color, label=name)
-                hist = (hist / total) * 100.0
+                ax.plot(hist * 100.0, color=color, label=name)
 
-        if (not is_extracting_features):
+        if not is_extracting_features:
             ax.set_xlim([0, 256])
             ax.set_xlabel("Pixel intensity")
             ax.set_ylabel("Proportion of pixels (%)")
