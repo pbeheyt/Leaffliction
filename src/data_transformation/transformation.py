@@ -1,7 +1,6 @@
 from plantcv import plantcv as pcv
 import matplotlib.pyplot as plt
 import numpy as np
-import argparse
 import sys
 import cv2
 import os
@@ -196,42 +195,6 @@ def save_transformations(transformations, dst_dir, base_name, ext):
         print(f"  saved {out_path}")
 
 
-def main():
-    parser = argparse.ArgumentParser(
-        description="Apply 6 image transformations to leaf images."
-    )
-    parser.add_argument(
-        "image", nargs="?", default=None,
-        help="Path to a single image (display mode)."
-    )
-    parser.add_argument(
-        "-src", dest="src", default=None,
-        help="Source directory containing images (batch mode)."
-    )
-    parser.add_argument(
-        "-dst", dest="dst", default=None,
-        help="Destination directory for transformed images."
-    )
-    for key, name in TRANSFORM_KEYS.items():
-        parser.add_argument(
-            f"-{key}", dest=key, action="store_true",
-            help=f"Apply only '{name}' (combinable)."
-        )
-    args = parser.parse_args()
-
-    selected = {k for k in TRANSFORM_KEYS if getattr(args, k)}
-    if not selected:
-        selected = set(TRANSFORM_KEYS.keys())
-
-    if args.image:
-        run_single(args.image, selected)
-    elif args.src and args.dst:
-        run_batch(args.src, args.dst, selected)
-    else:
-        parser.print_help()
-        sys.exit(1)
-
-
 def run_single(image_path, selected):
     img = load_image(image_path)
     if img is None:
@@ -265,7 +228,3 @@ def run_batch(src_dir, dst_dir, selected):
             save_transformations(transformations, out_dir, base_name, ext)
     if not found:
         print(f"No images found in {src_dir}")
-
-
-if __name__ == "__main__":
-    main()

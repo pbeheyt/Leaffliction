@@ -82,7 +82,7 @@ AUGMENTATION_REGISTRY = {
 }
 
 
-def augment_image(image_path):
+def augment_image(image_path, results_dir="results"):
     """
     Apply all 6 augmentation types to a single image.
     Saves each result as <original_name>_<Type>.<ext> alongside the source,
@@ -104,11 +104,11 @@ def augment_image(image_path):
     )
     axes_flat = axes.flatten()
 
-    out_dir = "results/augmented_images"
+    out_dir = os.path.join(results_dir, "augmented_images")
     os.makedirs(out_dir, exist_ok=True)
 
     for idx, (trans_name, modified_img) in enumerate(transformations.items()):
-        out_filename = f"{out_dir}/{orig_name}_{trans_name}{ext}"
+        out_filename = os.path.join(out_dir, f"{orig_name}_{trans_name}{ext}")
         cv2.imwrite(out_filename, modified_img)
         print(f"Saved: {out_filename}")
 
@@ -120,9 +120,9 @@ def augment_image(image_path):
 
     plt.tight_layout()
 
-    os.makedirs("results", exist_ok=True)
+    os.makedirs(results_dir, exist_ok=True)
     base_name = os.path.basename(orig_name)
-    out_path = f"results/augmentation_plot_{base_name}.png"
+    out_path = os.path.join(results_dir, f"augmentation_plot_{base_name}.png")
 
     plt.savefig(out_path, bbox_inches="tight")
     plt.show()

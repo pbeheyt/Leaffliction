@@ -1,4 +1,3 @@
-import argparse
 import json
 import os
 from collections import Counter
@@ -139,67 +138,32 @@ def _evaluate_model(model, x_train, y_train, x_val, y_val):
     }
 
 
-def main():
-    parser = argparse.ArgumentParser(
-        description=(
-            "Train classifier with stratified split, validation metrics, "
-            "and artifact export."
-        )
-    )
-    parser.add_argument("directory", help="Path to the dataset directory")
-    parser.add_argument(
-        "--test-size",
-        type=float,
-        default=0.2,
-        help="Validation ratio for stratified split (default: 0.2)",
-    )
-    parser.add_argument(
-        "--random-state",
-        type=int,
-        default=42,
-        help="Random state for deterministic split (default: 42)",
-    )
-    parser.add_argument(
-        "--artifacts-dir",
-        default="models",
-        help="Directory where trained artifacts are saved (default: models).",
-    )
-    parser.add_argument(
-        "--report-dir",
-        default="results/classification",
-        help=(
-            "Directory where validation reports are saved "
-            "(default: results/classification)."
-        ),
-    )
-    parser.add_argument(
-        "--min-val-samples",
-        type=int,
-        default=100,
-        help=(
-            "Minimum recommended validation samples for evaluation "
-            "evidence (default: 100)."
-        ),
-    )
-    args = parser.parse_args()
+def train_model(
+    directory,
+    test_size=0.2,
+    random_state=42,
+    artifacts_dir="models",
+    report_dir="results/classification",
+    min_val_samples=100,
+):
 
-    if not os.path.isdir(args.directory):
-        print(f"Error: {args.directory} is not a valid directory.")
+    if not os.path.isdir(directory):
+        print(f"Error: {directory} is not a valid directory.")
         return
 
-    if not 0.0 < args.test_size < 1.0:
+    if not 0.0 < test_size < 1.0:
         print("Error: --test-size must be between 0 and 1.")
         return
 
-    print(f"[train] loading dataset from: {args.directory}", flush=True)
-    x_data, y_data = load_dataset(args.directory)
+    print(f"[train] loading dataset from: {directory}", flush=True)
+    x_data, y_data = load_dataset(directory)
     print("[train] dataset loaded, computing stratified split", flush=True)
 
     x_train, x_val, y_train, y_val = train_test_split(
         x_data,
         y_data,
-        test_size=args.test_size,
-        random_state=args.random_state,
+        test_size=test_size,
+        random_state=random_state,
         stratify=y_data,
     )
 
@@ -217,7 +181,7 @@ def main():
         flush=True,
     )
     for params in candidates:
-        model = _build_random_forest(params, args.random_state)
+        model = _build_random_forest(params, random_state)
         result = _evaluate_model(model, x_train, y_train, x_val, y_val)
         print(
             "[train] random_forest params="
@@ -228,8 +192,8 @@ def main():
             best_result = result
             best_params = params
 
-    os.makedirs(args.artifacts_dir, exist_ok=True)
-    os.makedirs(args.report_dir, exist_ok=True)
+    os.makedirs(artifacts_dir, exist_ok=True)
+    os.makedirs(report_dir, exist_ok=True)
 
     artifact_payload = {
         "model": best_result["model"],
@@ -239,18 +203,18 @@ def main():
         "feature_size": int(x_data.shape[1]),
         "train_size": int(len(y_train)),
         "validation_size": int(len(y_val)),
-        "test_size": float(args.test_size),
-        "random_state": int(args.random_state),
+        "test_size": float(test_size),
+        "random_state": int(random_state),
     }
 
-    artifact_path = os.path.join(args.artifacts_dir, "leaf_model.joblib")
+    artifact_path = os.path.join(artifacts_dir, "leaf_model.joblib")
     joblib.dump(artifact_payload, artifact_path, compress=3)
 
     report_payload = {
         "timestamp_utc": datetime.now(timezone.utc).isoformat(
             timespec="seconds"
         ),
-        "dataset_directory": args.directory,
+        "dataset_directory": directory,
         "model_name": best_name,
         "model_params": best_params,
         "overall_accuracy": best_result["accuracy"],
@@ -261,13 +225,13 @@ def main():
         "train_distribution": dict(sorted(train_counts.items())),
         "validation_distribution": dict(sorted(val_counts.items())),
         "classification_report": best_result["report_dict"],
-        "recommended_min_validation_samples": args.min_val_samples,
-        "meets_min_validation_samples": len(y_val) >= args.min_val_samples,
+        "recommended_min_validation_samples": min_val_samples,
+        "meets_min_validation_samples": len(y_val) >= min_val_samples,
         "meets_accuracy_90": best_result["accuracy"] >= 0.90,
     }
 
-    json_report_path = os.path.join(args.report_dir, "validation_report.json")
-    text_report_path = os.path.join(args.report_dir, "validation_report.txt")
+    json_report_path = os.path.join(report_dir, "validation_report.json")
+    text_report_path = os.path.join(report_dir, "validation_report.txt")
 
     with open(json_report_path, "w", encoding="utf-8") as json_file:
         json.dump(report_payload, json_file, indent=2)
@@ -295,12 +259,8 @@ def main():
     print(f"Artifact saved to: {artifact_path}")
     print(f"JSON report saved to: {json_report_path}")
     print(f"Text report saved to: {text_report_path}")
-    if len(y_val) < args.min_val_samples:
+    if len(y_val) < min_val_samples:
         print(
             f"Warning: validation set has {len(y_val)} samples "
-            f"(< {args.min_val_samples})."
+            f"(< {min_val_samples})."
         )
-
-
-if __name__ == "__main__":
-    main()
