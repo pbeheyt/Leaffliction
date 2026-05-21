@@ -1,4 +1,4 @@
-.PHONY: all create-venv install-deps setup distribution augmentation balance transform transform-batch train predict package signature clean jupyter lint
+.PHONY: all create-venv install-deps setup distribution augmentation balance transform transform-batch train predict package signature clean jupyter lint verify
 
 
 
@@ -74,8 +74,8 @@ signature:
 	@sha1sum "$(PACKAGE_PATH)" > "$(SIGNATURE_PATH)"
 	@echo "Signature saved: $(SIGNATURE_PATH)"
 
-transformation:
-	@venv/bin/python3 scripts/transformation.py "data/leaves/images/Apple_healthy/image (1).JPG"
+verify:
+	@sha1sum -c "$(SIGNATURE_PATH)"
 
 lint:
 	@venv/bin/flake8 scripts

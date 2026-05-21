@@ -71,6 +71,47 @@ def _candidate_rf_params():
     ]
 
 
+def _build_report_text(report_dict):
+    labels = [
+        label
+        for label in report_dict
+        if label not in {"accuracy", "macro avg", "weighted avg"}
+    ]
+    label_width = max([len(label) for label in labels] + [len("accuracy")])
+    header = f"{'':<{label_width}}  {'precision':>9}  {'recall':>7}"
+    lines = [header]
+
+    for label in labels:
+        metrics = report_dict[label]
+        precision = float(metrics.get("precision", 0.0))
+        recall = float(metrics.get("recall", 0.0))
+        lines.append(
+            f"{label:<{label_width}}  {precision:>9.4f}  {recall:>7.4f}"
+        )
+
+    accuracy = report_dict.get("accuracy")
+    if accuracy is not None:
+        lines.append("")
+        lines.append(f"{'accuracy':<{label_width}}  {float(accuracy):>9.4f}")
+
+    return "\n".join(lines)
+
+
+def _trim_report_dict(report_dict):
+    trimmed = {}
+    for label, metrics in report_dict.items():
+        if label in {"macro avg", "weighted avg"}:
+            continue
+        if label == "accuracy":
+            trimmed[label] = float(metrics)
+            continue
+        trimmed[label] = {
+            "precision": float(metrics.get("precision", 0.0)),
+            "recall": float(metrics.get("recall", 0.0)),
+        }
+    return trimmed
+
+
 def _evaluate_model(model, x_train, y_train, x_val, y_val):
     model.fit(x_train, y_train)
     y_pred = model.predict(x_val)
@@ -81,12 +122,8 @@ def _evaluate_model(model, x_train, y_train, x_val, y_val):
         output_dict=True,
         zero_division=0,
     )
-    report_text = classification_report(
-        y_val,
-        y_pred,
-        digits=4,
-        zero_division=0,
-    )
+    trimmed_report = _trim_report_dict(report_dict)
+    report_text = _build_report_text(trimmed_report)
 
     confidence = None
     if hasattr(model, "predict_proba"):
@@ -96,7 +133,7 @@ def _evaluate_model(model, x_train, y_train, x_val, y_val):
     return {
         "model": model,
         "accuracy": accuracy,
-        "report_dict": report_dict,
+        "report_dict": trimmed_report,
         "report_text": report_text,
         "mean_confidence": confidence,
     }
@@ -138,7 +175,8 @@ def main():
     args = parser.parse_args()
 
     if not os.path.isdir(args.directory):
-        print(f"Error: {args.directory} data/augmented is not a valid directory.")
+        print(
+            f"Error: {args.directory} data/augmented is not a valid directory.")
         return
 
     if not 0.0 < args.test_size < 1.0:
@@ -251,5 +289,7 @@ def main():
         print(
             f"Warning: validation set has {len(y_val)} samples (< {args.min_val_samples})."
         )
+
+
 if __name__ == "__main__":
     main()
