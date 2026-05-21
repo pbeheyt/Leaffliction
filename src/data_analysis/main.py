@@ -20,7 +20,10 @@ def run(path, output):
 
 def main():
     parser = argparse.ArgumentParser(
-        description="Unified data analysis entrypoint for single-image augmentation or dataset balancing."
+        description=(
+            "Unified data analysis entrypoint for single-image "
+            "augmentation or dataset balancing."
+        )
     )
     parser.add_argument("path", help="Path to an image or a dataset directory")
     parser.add_argument(

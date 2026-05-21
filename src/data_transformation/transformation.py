@@ -243,22 +243,27 @@ def run_batch(src_dir, dst_dir, selected):
     if not os.path.isdir(src_dir):
         print(f"Error: {src_dir} is not a directory", file=sys.stderr)
         sys.exit(1)
-    files = sorted(
-        f for f in os.listdir(src_dir)
-        if f.lower().endswith(IMAGE_EXTS)
-    )
-    if not files:
+    found = False
+    for root, dirs, files in os.walk(src_dir):
+        dirs.sort()
+        for fname in sorted(files):
+            if not fname.lower().endswith(IMAGE_EXTS):
+                continue
+            found = True
+            src_path = os.path.join(root, fname)
+            rel_dir = os.path.relpath(root, src_dir)
+            out_dir = dst_dir if rel_dir == "." else os.path.join(
+                dst_dir, rel_dir
+            )
+            print(f"Processing {src_path}")
+            img = load_image(src_path)
+            if img is None:
+                continue
+            base_name, ext = os.path.splitext(fname)
+            transformations = compute_transformations(img, selected)
+            save_transformations(transformations, out_dir, base_name, ext)
+    if not found:
         print(f"No images found in {src_dir}")
-        return
-    for fname in files:
-        src_path = os.path.join(src_dir, fname)
-        print(f"Processing {src_path}")
-        img = load_image(src_path)
-        if img is None:
-            continue
-        base_name, ext = os.path.splitext(fname)
-        transformations = compute_transformations(img, selected)
-        save_transformations(transformations, dst_dir, base_name, ext)
 
 
 if __name__ == "__main__":

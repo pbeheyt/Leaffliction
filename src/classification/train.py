@@ -141,7 +141,10 @@ def _evaluate_model(model, x_train, y_train, x_val, y_val):
 
 def main():
     parser = argparse.ArgumentParser(
-        description="Train classifier with stratified split, validation metrics, and artifact export."
+        description=(
+            "Train classifier with stratified split, validation metrics, "
+            "and artifact export."
+        )
     )
     parser.add_argument("directory", help="Path to the dataset directory")
     parser.add_argument(
@@ -164,19 +167,24 @@ def main():
     parser.add_argument(
         "--report-dir",
         default="results/classification",
-        help="Directory where validation reports are saved (default: results/classification).",
+        help=(
+            "Directory where validation reports are saved "
+            "(default: results/classification)."
+        ),
     )
     parser.add_argument(
         "--min-val-samples",
         type=int,
         default=100,
-        help="Minimum recommended validation samples for evaluation evidence (default: 100).",
+        help=(
+            "Minimum recommended validation samples for evaluation "
+            "evidence (default: 100)."
+        ),
     )
     args = parser.parse_args()
 
     if not os.path.isdir(args.directory):
-        print(
-            f"Error: {args.directory} data/augmented is not a valid directory.")
+        print(f"Error: {args.directory} is not a valid directory.")
         return
 
     if not 0.0 < args.test_size < 1.0:
@@ -239,7 +247,9 @@ def main():
     joblib.dump(artifact_payload, artifact_path, compress=3)
 
     report_payload = {
-        "timestamp_utc": datetime.now(timezone.utc).isoformat(timespec="seconds"),
+        "timestamp_utc": datetime.now(timezone.utc).isoformat(
+            timespec="seconds"
+        ),
         "dataset_directory": args.directory,
         "model_name": best_name,
         "model_params": best_params,
@@ -287,7 +297,8 @@ def main():
     print(f"Text report saved to: {text_report_path}")
     if len(y_val) < args.min_val_samples:
         print(
-            f"Warning: validation set has {len(y_val)} samples (< {args.min_val_samples})."
+            f"Warning: validation set has {len(y_val)} samples "
+            f"(< {args.min_val_samples})."
         )
 
 

@@ -67,7 +67,9 @@ def distort_image(img, power=0.5):
     new_camera_matrix, _ = cv2.getOptimalNewCameraMatrix(
         camera_matrix, dist_coeffs, (w, h), 1, (w, h)
     )
-    return cv2.undistort(img, camera_matrix, dist_coeffs, None, new_camera_matrix)
+    return cv2.undistort(
+        img, camera_matrix, dist_coeffs, None, new_camera_matrix
+    )
 
 
 AUGMENTATION_REGISTRY = {
@@ -97,7 +99,9 @@ def augment_image(image_path):
     }
 
     fig, axes = plt.subplots(3, 2, figsize=(10, 8))
-    fig.suptitle(f"Data Augmentation for {os.path.basename(image_path)}", fontsize=14)
+    fig.suptitle(
+        f"Data Augmentation for {os.path.basename(image_path)}", fontsize=14
+    )
     axes_flat = axes.flatten()
 
     for idx, (trans_name, modified_img) in enumerate(transformations.items()):

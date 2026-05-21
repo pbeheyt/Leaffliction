@@ -22,7 +22,9 @@ def analyze_dataset(directory):
 
         folder_name = os.path.basename(root)
         image_count = sum(
-            1 for file in files if os.path.splitext(file)[1].lower() in valid_extensions
+            1
+            for file in files
+            if os.path.splitext(file)[1].lower() in valid_extensions
         )
 
         if image_count > 0:
@@ -39,7 +41,8 @@ def analyze_dataset(directory):
 
     fig, (ax1, ax2) = plt.subplots(1, 2, figsize=(15, 6))
     fig.suptitle(
-        f"Distribution of {dataset_name} dataset ({total_images} total images)",
+        f"Distribution of {dataset_name} dataset "
+        f"({total_images} total images)",
         fontsize=16,
     )
 

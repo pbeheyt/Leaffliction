@@ -64,7 +64,10 @@ def balance_directory(dataset_dir, output_dir, seed=None):
         if images_to_add <= 0:
             continue
 
-        print(f"[{class_name}] Augmenting {images_to_add} files to reach balance...")
+        print(
+            f"[{class_name}] Augmenting {images_to_add} files "
+            "to reach balance..."
+        )
         failures = 0
         max_failures = max(10, len(image_list) * 2)
         while images_to_add > 0 and failures < max_failures:
@@ -86,4 +89,6 @@ def balance_directory(dataset_dir, output_dir, seed=None):
             images_to_add -= 1
 
         if failures >= max_failures:
-            print(f"[{class_name}] Stopped early due to repeated read failures.")
+            print(
+                f"[{class_name}] Stopped early due to repeated read failures."
+            )

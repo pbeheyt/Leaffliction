@@ -78,7 +78,7 @@ verify:
 	@sha1sum -c "$(SIGNATURE_PATH)"
 
 lint:
-	@venv/bin/flake8 scripts
+	@venv/bin/flake8 src
 
 jupyter:
 	@venv/bin/jupyter lab
