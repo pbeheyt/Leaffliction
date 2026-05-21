@@ -100,8 +100,10 @@ def augment_image(image_path):
     fig.suptitle(f"Data Augmentation for {os.path.basename(image_path)}", fontsize=14)
     axes_flat = axes.flatten()
 
+    os.makedirs("results/augmented_images", exist_ok=True)
+    
     for idx, (trans_name, modified_img) in enumerate(transformations.items()):
-        out_filename = f"{orig_name}_{trans_name}{ext}"
+        out_filename = f"results/augmented_images/{orig_name}_{trans_name}{ext}"
         cv2.imwrite(out_filename, modified_img)
         print(f"Saved: {out_filename}")
 
