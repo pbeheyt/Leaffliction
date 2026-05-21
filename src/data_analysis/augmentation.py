@@ -104,8 +104,11 @@ def augment_image(image_path):
     )
     axes_flat = axes.flatten()
 
+    out_dir = "results/augmented_images"
+    os.makedirs(out_dir, exist_ok=True)
+
     for idx, (trans_name, modified_img) in enumerate(transformations.items()):
-        out_filename = f"{orig_name}_{trans_name}{ext}"
+        out_filename = f"{out_dir}/{orig_name}_{trans_name}{ext}"
         cv2.imwrite(out_filename, modified_img)
         print(f"Saved: {out_filename}")
 
